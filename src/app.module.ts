@@ -1,25 +1,33 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from './Config/typeorm.config';
-import { CustomTypeOrmLogger } from './logger/logger';
+import { typeOrmConfig } from './database/Config/typeorm.config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './users/user.module';
-import { PostModule } from './posts/post.module'; // Import the PostModule
-import { CommentsModule } from './comments/comment.module';
-
+import { UserModule } from './modules/user/user.module';
+import { PostModule } from './modules/post/post.module'; // Import the PostModule
+import { CommentsModule } from './modules/comment/comment.module';
+import { LoggingMiddleware } from './middleware/logging.middleware';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { APP_FILTER } from '@nestjs/core';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       ...typeOrmConfig,
       autoLoadEntities: true,
-       logger: new CustomTypeOrmLogger()
     }),
-    UserModule, 
+    UserModule,
     CommentsModule,
-    PostModule, 
+    PostModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_INTERCEPTOR,
+    useClass: LoggingInterceptor,
+    
+  },],
 })
-export class AppModule {}
+export class AppModule  {
+
+}

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseInterceptors } from '@nestjs/common';
 import { CommentsService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -19,7 +19,7 @@ export class CommentsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.commentsService.findOne(id);
+    return await this.commentsService.findOne(+id);
   }
 
   @Patch(':id')
@@ -28,8 +28,8 @@ export class CommentsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number) {
-    await this.commentsService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.commentsService.remove(+id);
     return { message: 'Comment deleted successfully' };
   }
 }
