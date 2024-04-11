@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
-import { User } from './user.entity';
-import { CreateUserDto } from './dto/create-user-dto';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import { UserService } from '@/modules/user/user.service';
+import { User } from '@/modules/user/user.entity';
+import { CreateUserDto } from '@/modules/user/dto/create-user-dto';
 
 @Controller('users')
 export class UserController {
@@ -13,7 +13,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<User> {
+  async findOne(@Param('id',ParseIntPipe) id: string): Promise<User> {
     return this.userService.findOne(+id);
   }
 
@@ -23,12 +23,12 @@ export class UserController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() userData: Partial<User>): Promise<User> {
+  async update(@Param('id',ParseIntPipe) id: string, @Body() userData: Partial<User>): Promise<User> {
     return this.userService.update(+id, userData);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  @Delete(':id',)
+  async remove(@Param('id',ParseIntPipe) id: string): Promise<void> {
     return this.userService.remove(+id);
   }
 }

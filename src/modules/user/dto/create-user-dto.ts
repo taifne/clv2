@@ -1,8 +1,6 @@
-import { Transform, Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, MinLength,MaxLength,Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, MinLength,MaxLength,Matches } from 'class-validator';
 
-import { lowerCaseTransformer } from '../../../untils/transformers/lower-case.transformer';
 
 export class CreateUserDto {
     @ApiProperty({ example: 'test1@example.com' })

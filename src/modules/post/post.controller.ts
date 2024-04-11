@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { Post as PostEntity } from './post.entity';
-import { PostService } from './post.service';
+import { Post as PostEntity } from '@/modules/post/post.entity';
+import { PostService } from '@/modules/post/post.service';
 
 @Controller('posts')
 export class PostController {

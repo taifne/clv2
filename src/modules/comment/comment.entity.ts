@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
-import { Post } from '../post/post.entity';
-import { User } from '../user/user.entity';
+import { Post } from '@/modules/post/post.entity';
+import { User } from '@/modules/user/user.entity';
 
 @Entity()
 export class Comment {

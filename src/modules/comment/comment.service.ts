@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comment } from './comment.entity';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { Comment } from '@/modules/comment/comment.entity';
+import { CreateCommentDto } from '@/modules/comment/dto/create-comment.dto';
+import { UpdateCommentDto } from '@/modules/comment/dto/update-comment.dto';
 
-import { Post } from 'src/modules/post/post.entity';
-import { User } from 'src/modules/user/doman/user';
+import { Post } from '@/modules/post/post.entity';
+import { User } from '@/modules/user/doman/user';
 @Injectable()
 export class CommentsService {
   constructor(
@@ -20,8 +20,6 @@ export class CommentsService {
 
   async create(createCommentDto: CreateCommentDto): Promise<Comment> {
     const { postId, userId, ...commentData } = createCommentDto;
-
-    // Load related entities (post and user) from the database
     const post = await this.postRepository.findOne({where: {id: postId}});
     if (!post) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
@@ -32,14 +30,12 @@ export class CommentsService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Create a new comment entity
     const newComment = this.commentRepository.create({
       ...commentData,
       post:postId,
       user:userId,
     });
 
-    // Save the newly created comment
     return await this.commentRepository.save(newComment);
   }
 
@@ -79,11 +75,10 @@ export class CommentsService {
     }
     
     if (softDelete) {
-      // Soft delete the comment by setting the deletedAt column
       comment.deletedAt = new Date();
       await this.commentRepository.save(comment);
     } else {
-      // Perform hard delete if soft delete is disabled
+     
       await this.commentRepository.delete(id);
     }
   }
