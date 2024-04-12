@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
+import { Comment } from '@/modules/comment/comment.entity';
 
 @Entity()
 export class User {
@@ -11,4 +12,9 @@ export class User {
   @Column()
   email: string;
 
+  @OneToMany(() => Comment, comment => comment.user)
+  comments: Comment[];
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 }

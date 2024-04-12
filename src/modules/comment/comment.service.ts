@@ -38,20 +38,37 @@ export class CommentsService {
 
     return await this.commentRepository.save(newComment);
   }
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    filter: any = {},
+  ): Promise<{ comments: Comment[]; total: number }> {
+    const skip = (page - 1) * limit;
 
-  async findAll(): Promise<Comment[]> {
-    const comments = await this.commentRepository.find({
-      where: { deletedAt: null },
+    const [comments, total] = await this.commentRepository.findAndCount({
+      where: { ...filter, deletedAt: null },
       relations: ['post', 'user'],
+      order: { [sortBy]: sortOrder },
+      take: limit,
+      skip: skip,
     });
+
     if (comments.length === 0) {
       throw new NotFoundException('No comments found');
     }
-    return comments;
-  }
 
+    return { comments, total };
+  }
   async findOne(id: number): Promise<Comment> {
-    const comment = await this.commentRepository.findOne({ where: { id, deletedAt: null } });
+    const comment = await this.commentRepository
+    .createQueryBuilder('comment')
+    .select(['comment.id', 'comment.content', 'user.username'])
+    .leftJoin('comment.user', 'user')
+    .where('comment.id = :id', { id })
+    .andWhere('comment.deletedAt IS NULL')
+    .getOne();
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
@@ -82,6 +99,44 @@ export class CommentsService {
       await this.commentRepository.delete(id);
     }
   }
-  
+  async getCommentsForPost(postId: number): Promise<Comment[]> {
+    // Query all comments for the given post from the database
+    const comments = await this.commentRepository.find({
+      where: { post: { id: postId } },
+      relations: ['user'], // Include user information if needed
+    });
+
+    // Organize comments into a hierarchical structure (tree)
+    const commentTree = this.buildCommentTree(comments);
+
+    // Return the comments in the tree structure
+    return commentTree;
+  }
+
+  private buildCommentTree(comments: Comment[]): Comment[] {
+    const commentMap = new Map<number, Comment>();
+    const rootComments: Comment[] = [];
+
+    // Build a map of comments by their ID for efficient lookup
+    comments.forEach(comment => {
+      comment.replies = [];
+      commentMap.set(comment.id, comment);
+      if (!comment.parentId) {
+        rootComments.push(comment);
+      }
+    });
+
+    // Attach replies to their parent comments
+    comments.forEach(comment => {
+      if (comment.parentId) {
+        const parentComment = commentMap.get(comment.parentId);
+        if (parentComment) {
+          parentComment.replies.push(comment);
+        }
+      }
+    });
+
+    return rootComments;
+  }
 
 }

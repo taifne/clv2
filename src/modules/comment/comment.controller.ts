@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, UseInterceptors, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseInterceptors, HttpCode, HttpStatus, ParseIntPipe, Query } from '@nestjs/common';
 import { CommentsService } from '@/modules/comment/comment.service';
 import { CreateCommentDto } from '@/modules/comment/dto/create-comment.dto';
 import { UpdateCommentDto } from '@/modules/comment/dto/update-comment.dto';
@@ -15,14 +15,20 @@ export class CommentsController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async findAll() {
-    return await this.commentsService.findAll();
+  async findAll(@Query() queryString: any) { 
+    const { page, limit, sortBy, sortOrder, filter } = queryString;
+    const comments = await this.commentsService.findAll(page, limit, sortBy, sortOrder, filter);
+    return comments;
   }
-
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async findOne(@Param('id',ParseIntPipe) id: string) {
     return await this.commentsService.findOne(+id);
+  }
+  @HttpCode(HttpStatus.OK)
+  @Get('/post/:id')
+  async findOneByPostId(@Param('id',ParseIntPipe) id: string) {
+    return await this.commentsService.getCommentsForPost(+id);
   }
 
   @HttpCode(HttpStatus.OK)
