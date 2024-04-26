@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, DeleteDateColumn, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, DeleteDateColumn, OneToMany, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Post } from '@/modules/post/post.entity';
 import { User } from '@/modules/user/user.entity';
 
@@ -15,14 +15,18 @@ export class Comment {
 
   @ManyToOne(() => Post, post => post.comments) 
   @JoinColumn({ name: 'postId' })
-  post: Post['id'];
+  post: Post;
 
   @ManyToOne(() => User, user => user.comments) 
   @JoinColumn({ name: 'userId' })
-  user: User['id'];
+  user: User;
 
   @OneToMany(() => Comment, comment => comment.parentId)
   replies: Comment[];
+
+  @ManyToMany(() => User)
+  @JoinTable({name:"likes"})
+  likes: User[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

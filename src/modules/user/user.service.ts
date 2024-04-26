@@ -12,9 +12,14 @@ export class UserService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        const users = await this.userRepository.find();
+        resolve(users);
+      }, 1000); 
+    });
   }
-
+  
   async findOne(id: any): Promise<User | undefined> {
     return await this.userRepository.findOne(id);
   }

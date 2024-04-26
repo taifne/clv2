@@ -8,12 +8,12 @@ import { AllConfigType } from '@/config/config.type';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   const configService = app.get(ConfigService<AllConfigType>);
-  // Configure global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true, // Automatically transform payload to DTO instance
-    whitelist: true, // Strip away unknown properties from DTO objects
-    forbidNonWhitelisted: true, // Throw error if unknown properties are present in DTO objects
-  }));
+  
+  // app.useGlobalPipes(new ValidationPipe({
+  //   transform: true, 
+  //   whitelist: true, 
+  //   forbidNonWhitelisted: true, 
+  // }));
 
   const config = new DocumentBuilder()
     .setTitle('CLV2 Tai Dang')

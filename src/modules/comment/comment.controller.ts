@@ -34,13 +34,13 @@ export class CommentsController {
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
   async update(@Param('id',ParseIntPipe) id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return await this.commentsService.update(+id, updateCommentDto);
+    return await this.commentsService.updateComment(+id, updateCommentDto);
   }
 
   @Delete(':id')
   async remove(@Param('id',ParseIntPipe) id: string) {
     await this.commentsService.remove(+id);
-    const hihi="hihdsd";
+
     return { message: 'Comment deleted haha' };
   }
 }
