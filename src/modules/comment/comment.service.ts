@@ -21,7 +21,7 @@ export class CommentsService {
     const { postId, userId,parentId, ...commentData } = createCommentDto;
     const post = await this.findOneOrFail(this.postRepository, postId, 'Post');
     const user = await this.findOneOrFail(this.userRepository, userId, 'User');
-    const parentComment = await this.findOneOrFail(this.userRepository, parentId, 'User');
+    const parentComment = await this.findOneOrFail(this.userRepository, parentId, 'Comment');
 
     const newComment = this.commentRepository.create({
       ...commentData,
@@ -67,6 +67,7 @@ export class CommentsService {
   
       return { comments, total };
     } catch (error) {
+      
       throw new InternalServerErrorException('Failed to fetch comments');
     }
   }
@@ -125,11 +126,15 @@ export class CommentsService {
   }
 
   async remove(id: number, softDelete: boolean = true): Promise<void> {
-    const comment = await this.findOneOrFail(this.commentRepository, id, 'Comment');
+    const entity = 'Comment';
+    const result = await this.commentRepository.findOne({ where: { id } });
+    if (!result) {
+      throw new NotFoundException(`${entity} with ID ${id} not found`);
+    }
 
     if (softDelete) {
-      comment.deletedAt = new Date();
-      await this.commentRepository.save(comment);
+      result.deletedAt = new Date();
+      await this.commentRepository.save(result);
     } else {
       await this.commentRepository.delete(id);
     }
