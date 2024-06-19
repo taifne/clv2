@@ -11,6 +11,8 @@ export class User {
 
   @Column()
   email: string;
+  @Column({ type: 'int', nullable: true })
+  age: number | null;
 
   @OneToMany(() => Comment, comment => comment.user)
   comments: Comment[];

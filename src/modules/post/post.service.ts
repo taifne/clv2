@@ -12,7 +12,16 @@ export class PostService {
   ) {}
 
   async findAll(): Promise<Post[]> {
-    return this.postRepository.find();
+    const posts = await this.postRepository
+    .createQueryBuilder('post')
+    .select('post')
+    .groupBy('post.title,post.id') // Grouping by title
+    .having('COUNT(post.title) > 0') // Having more than one comment
+    .orderBy('post.created_at', 'DESC') // Ordering by created_at in descending order
+    .getMany();
+
+return posts;
+   
   }
 
   async findById(id: number): Promise<Post> {

@@ -20,6 +20,7 @@ export class PostController {
     }
     return post;
   }
+  
 
   @Post()
   async create(@Body() post: CreatePostDto): Promise<PostEntity> {

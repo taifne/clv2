@@ -6,6 +6,14 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // @Column({
+  //   type: 'varchar',
+  //   length: 100,
+  //   nullable: false,
+  //   unique: true,
+  //   comment: 'The name of the user',
+  // })
+  // name: string;
   @Column()
   title: string;
 

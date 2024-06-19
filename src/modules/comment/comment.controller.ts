@@ -41,6 +41,6 @@ export class CommentsController {
   async remove(@Param('id',ParseIntPipe) id: string) {
     await this.commentsService.remove(+id);
 
-    return { message: 'Comment deleted haha' };
+    return { message: 'Comment deleted ' };
   }
 }

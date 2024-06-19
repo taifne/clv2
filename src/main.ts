@@ -9,11 +9,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   const configService = app.get(ConfigService<AllConfigType>);
   
-  // app.useGlobalPipes(new ValidationPipe({
-  //   transform: true, 
-  //   whitelist: true, 
-  //   forbidNonWhitelisted: true, 
-  // }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true, 
+    whitelist: true, 
+    forbidNonWhitelisted: true, 
+  }));
 
   const config = new DocumentBuilder()
     .setTitle('CLV2 Tai Dang')

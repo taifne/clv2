@@ -22,32 +22,32 @@ describe('CommentsService', () => {
         CommentsService,
         {
           provide: getRepositoryToken(Comment),
-          useValue:{
-            create:jest.fn(),
+          useValue: {
+            create: jest.fn(),
             save: jest.fn(),
             findOne: jest.fn(),
-            createQueryBuilder:jest.fn(),
+            createQueryBuilder: jest.fn(),
             delete: jest.fn(),
-            findAndCount:jest.fn(),
+            findAndCount: jest.fn(),
           }
         },
         {
           provide: getRepositoryToken(Post),
-          useValue:{
-            create:jest.fn(),
+          useValue: {
+            create: jest.fn(),
             save: jest.fn(),
             findOne: jest.fn(),
           }
         },
         {
           provide: getRepositoryToken(User),
-          useValue:{
-            create:jest.fn(),
+          useValue: {
+            create: jest.fn(),
             save: jest.fn(),
             findOne: jest.fn(),
           }
         },
-          ],
+      ],
     }).compile();
 
     commentsService = module.get<CommentsService>(CommentsService);
@@ -73,7 +73,7 @@ describe('CommentsService', () => {
         user: { id: 1, username: 'test_user', email: 'test@example.com', comments: [], createdAt: new Date() },
         post: { id: 1, title: 'Test post', content: 'Test content', comments: [], createdAt: new Date() },
         replies: [],
-        parentId:null,
+        parentId: null,
         likes: [],
         createdAt: new Date(),
         deletedAt: null,
@@ -87,31 +87,28 @@ describe('CommentsService', () => {
         getOne: jest.fn().mockResolvedValue(mockComment),
       } as any);
 
-         const result = await commentsService.findOne(commentId);
+      const result = await commentsService.findOne(commentId);
 
-     
+
       expect(result).toEqual(mockComment);
     });
 
     it('should throw NotFoundException if comment is not found', async () => {
-      // Arrange
       const commentId = 1;
-
       jest.spyOn(commentRepository, 'createQueryBuilder').mockReturnValue({
         leftJoin: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(undefined), // Simulate comment not found
+        getOne: jest.fn().mockResolvedValue(undefined),
       } as any);
 
-      // Act and Assert
-      await expect(commentsService.findOne(commentId)).rejects.toThrowError(NotFoundException);
+      await expect(commentsService.findOne(commentId)).rejects.toThrow(NotFoundException);
     });
   });
   describe('remove', () => {
     it('should soft delete a comment if softDelete is true', async () => {
-     
+
       const commentId = 1;
       const mockComment: Comment = {
         id: commentId,
@@ -119,7 +116,7 @@ describe('CommentsService', () => {
         user: { id: 1, username: 'test_user', email: 'test@example.com', comments: [], createdAt: new Date() },
         post: { id: 1, title: 'Test post', content: 'Test content', comments: [], createdAt: new Date() },
         replies: [],
-        parentId:null,
+        parentId: null,
         likes: [],
         createdAt: new Date(),
         deletedAt: null,
@@ -129,10 +126,10 @@ describe('CommentsService', () => {
       jest.spyOn(commentRepository, 'save').mockResolvedValue(mockComment);
 
 
-     
-      await  commentsService.remove(commentId, true);
 
-     
+      await commentsService.remove(commentId, true);
+
+
       expect(mockComment.deletedAt).not.toBeNull();
     });
 
@@ -144,19 +141,19 @@ describe('CommentsService', () => {
         user: { id: 1, username: 'test_user', email: 'test@example.com', comments: [], createdAt: new Date() },
         post: { id: 1, title: 'Test post', content: 'Test content', comments: [], createdAt: new Date() },
         replies: [],
-        parentId:null,
+        parentId: null,
         likes: [],
         createdAt: new Date(),
         deletedAt: null,
       };
       jest.spyOn(commentRepository, 'findOne').mockResolvedValue(mockComment);
-     
+
       jest.spyOn(commentRepository, 'delete').mockResolvedValue({} as any);
-    
-  
+
+
       await commentsService.remove(commentId, false);
-    
-  
+
+
       expect(commentRepository.delete).toHaveBeenCalledWith(commentId);
     });
 
@@ -165,7 +162,7 @@ describe('CommentsService', () => {
       const commentId = 1;
       jest.spyOn(commentRepository, 'findOne').mockResolvedValue(null);
 
-    
+
       await expect(commentsService.remove(commentId)).rejects.toThrow(NotFoundException);
     });
   });
@@ -194,41 +191,41 @@ describe('CommentsService', () => {
     });
 
     it('should throw BadRequestException with invalid pagination parameters', async () => {
-    
+
       await expect(async () => {
         await commentsService.findAll(0, 10, 'createdAt', 'DESC', {});
       }).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException with invalid sortBy parameter', async () => {
-     
+
       await expect(async () => {
         await commentsService.findAll(1, 10, 'invalidField', 'DESC', {});
       }).rejects.toThrow(BadRequestException);
     });
 
     it('should throw InternalServerErrorException when no comments found', async () => {
-          jest.spyOn(commentRepository, 'findAndCount').mockResolvedValueOnce([[], 0]);
+      jest.spyOn(commentRepository, 'findAndCount').mockResolvedValueOnce([[], 0]);
 
-            await expect(async () => {
-              let comment = await  commentsService.findAll(1, 10, 'createdAt', 'DESC', {});
-              console.log(comment);
+      await expect(async () => {
+        let comment = await commentsService.findAll(1, 10, 'createdAt', 'DESC', {});
+        console.log(comment);
         await commentsService.findAll(1, 10, 'createdAt', 'DESC', {});
       }).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should throw InternalServerErrorException on failure to fetch comments', async () => {
-            jest.spyOn(commentRepository, 'findAndCount').mockRejectedValueOnce(new Error('Database connection error'));
+      jest.spyOn(commentRepository, 'findAndCount').mockRejectedValueOnce(new Error('Database connection error'));
 
-            await expect(async () => {
+      await expect(async () => {
         await commentsService.findAll(1, 10, 'createdAt', 'DESC', {});
       }).rejects.toThrow(InternalServerErrorException);
     });
   });
 
-  
+
   it('should update a comment', async () => {
-   
+
     const commentId = 1;
     const updateCommentDto: UpdateCommentDto = {
       content: 'Updated content',
@@ -238,9 +235,9 @@ describe('CommentsService', () => {
     const existingComment = new Comment();
     existingComment.id = commentId;
     existingComment.content = 'Original content';
-    existingComment.likes = []; 
+    existingComment.likes = [];
 
-    
+
     commentRepository.findOne = jest.fn().mockResolvedValue(existingComment);
     commentRepository.save = jest.fn().mockResolvedValue(existingComment);
     await commentsService.updateComment(commentId, updateCommentDto);

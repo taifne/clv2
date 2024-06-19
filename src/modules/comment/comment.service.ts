@@ -21,10 +21,11 @@ export class CommentsService {
     const { postId, userId,parentId, ...commentData } = createCommentDto;
     const post = await this.findOneOrFail(this.postRepository, postId, 'Post');
     const user = await this.findOneOrFail(this.userRepository, userId, 'User');
-    const parentComment = await this.findOneOrFail(this.userRepository, parentId, 'Comment');
+    const parentComment =parentId!==null? await this.findOneOrFail(this.commentRepository, parentId, 'Comment'):null;
 
     const newComment = this.commentRepository.create({
       ...commentData,
+      parentId:parentComment?.id??null,
       post,
       user,
     });
@@ -60,6 +61,13 @@ export class CommentsService {
         take: limit,
         skip,
       });
+      // const [comments, total] = await this.commentRepository.findAndCount({
+      //   where: { ...filter, deletedAt: null },
+      //   relations: ['post', 'user'],
+      //   order: { [sortBy]: sortOrder },
+      //   take: limit,
+      //   skip,
+      // });
   
       if (comments.length === 0) {
         throw new NotFoundException('No comments found');
@@ -67,7 +75,6 @@ export class CommentsService {
   
       return { comments, total };
     } catch (error) {
-      
       throw new InternalServerErrorException('Failed to fetch comments');
     }
   }
@@ -89,6 +96,22 @@ export class CommentsService {
       .andWhere('comment.deletedAt IS NULL')
       .getOne();
   
+//       SELECT 
+//   comment.id AS comment_id,
+//   comment.content AS comment_content,
+//   user.username AS user_username,
+//   likes.id AS likes_id,
+//   likes.username AS likes_username
+// FROM 
+//   comment
+// LEFT JOIN 
+//   user ON comment.userId = user.id
+// LEFT JOIN 
+//   likes ON likes.commentId = comment.id
+// WHERE 
+//   comment.id = :id 
+//   AND comment.deletedAt IS NULL;
+
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
@@ -98,7 +121,7 @@ export class CommentsService {
     let commentToUpdate = await this.commentRepository.findOne({where:{id:id}, relations: ['likes'] });
 
     if (!commentToUpdate) {
-      throw new Error('Comment not found');
+      throw new NotFoundException('Comment not found');
     }
 
     if (updateCommentDto.likes !== undefined) {
@@ -126,15 +149,11 @@ export class CommentsService {
   }
 
   async remove(id: number, softDelete: boolean = true): Promise<void> {
-    const entity = 'Comment';
-    const result = await this.commentRepository.findOne({ where: { id } });
-    if (!result) {
-      throw new NotFoundException(`${entity} with ID ${id} not found`);
-    }
+    const comment = await this.findOneOrFail(this.commentRepository, id, 'Comment');
 
     if (softDelete) {
-      result.deletedAt = new Date();
-      await this.commentRepository.save(result);
+      comment.deletedAt = new Date();
+      await this.commentRepository.save(comment);
     } else {
       await this.commentRepository.delete(id);
     }
